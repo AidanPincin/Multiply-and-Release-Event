@@ -4,7 +4,7 @@ let green = 0
 let red = 0
 let squareSize = 10
 let accuracy = 20
-let coolDown = 120
+let coolDown = 60
 class Marble{
     constructor(x,y,r,mass,color,vx,vy,gravity=true){
         this.x = x
@@ -124,9 +124,7 @@ class Bullet{
         this.detect = true
     }
     math(){
-        this.x += this.vx
-        this.y += this.vy
-        this.size = 7+Math.sqrt(Math.sqrt(this.mass))
+        this.size = 7+Math.sqrt(Math.sqrt(Math.pow(this.mass,1.5)))
         if(this.x<600+this.size){
             this.x = 1400-this.size
         }
@@ -181,6 +179,36 @@ class Bullet{
                     }
                 }
             }
+        }
+        for(let k=0; k<accuracy; k++){
+            for(let i=0; i<bullets.length; i++){
+                if(bullets[i] != this){
+                    const b1 = this
+                    const b2 = bullets[i]
+                    const x_dist = b2.x - b1.x
+                    const y_dist = b2.y - b1.y
+                    const collisionDist = b1.size+b2.size
+                    const dist = Math.sqrt(Math.pow(x_dist,2)+Math.pow(y_dist,2))
+                    if(dist<collisionDist){
+                        const dx = x_dist/dist
+                        const dy = y_dist/dist
+                        const vx = b1.vx - b2.vx
+                        const vy = b1.vy - b2.vy
+                        const speed = vx*dx+vy*dy
+                        const impulse = 2*speed/(b1.mass+b2.mass)
+                        b1.vx -= impulse*b2.mass*dx
+                        b1.vy -= impulse*b2.mass*dy
+                        b2.vx += impulse*b1.mass*dx
+                        const dif = dist-collisionDist
+                        b1.x+=dx*dif/2*(b2.mass/(b1.mass+b2.mass))
+                        b1.y+=dy*dif/2*(b2.mass/(b1.mass+b2.mass))
+                        b2.x-=dx*dif/2*(b1.mass/(b1.mass+b2.mass))
+                        b2.y-=dy*dif/2*(b1.mass/(b1.mass+b2.mass))
+                    }
+                }
+            }
+            this.x += this.vx/accuracy
+            this.y += this.vy/accuracy
         }
     }
     draw(){
@@ -261,8 +289,8 @@ class Tower{
         ctx.translate(this.x,this.y)
         ctx.fillStyle = this.color
         ctx.rotate(this.angle)
-        ctx.fillRect(0,-5,30,10)
-        ctx.strokeRect(0,-5,30,10)
+        ctx.fillRect(0,-5,29+Math.sqrt(Math.sqrt(Math.pow(this.size,1.75))),9+Math.sqrt(Math.sqrt(this.size)))
+        ctx.strokeRect(0,-5,29+Math.sqrt(Math.sqrt(Math.pow(this.size,1.75))),9+Math.sqrt(Math.sqrt(this.size)))
         ctx.restore()
         ctx.beginPath()
         ctx.arc(this.x,this.y,this.s-2,0,Math.PI*2,false)
