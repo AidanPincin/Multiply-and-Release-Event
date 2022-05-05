@@ -127,7 +127,7 @@ class Bullet{
         this.size = 7+Math.sqrt(Math.sqrt(Math.pow(this.mass,1.5)))
         if(this.x<600+this.size){
             for(let i=0; i<squares.length; i++){
-                if(this.x+this.size+Math.abs(this.vx)>squares[i].x && this.x-this.size-Math.abs(this.vx)<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)>squares[i].y && this.y-this.size-Math.abs(this.vy)<squares[i].y+squareSize){
+                if(this.x+this.size+Math.abs(this.vx)+3>squares[i].x && this.x-this.size-Math.abs(this.vx)-3<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)+3>squares[i].y && this.y-this.size-Math.abs(this.vy)-3<squares[i].y+squareSize){
                     squares[i].draw()
                 }
             }
@@ -135,7 +135,7 @@ class Bullet{
         }
         if(this.x>1400-this.size){
             for(let i=0; i<squares.length; i++){
-                if(this.x+this.size+Math.abs(this.vx)>squares[i].x && this.x-this.size-Math.abs(this.vx)<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)>squares[i].y && this.y-this.size-Math.abs(this.vy)<squares[i].y+squareSize){
+                if(this.x+this.size+Math.abs(this.vx)+3>squares[i].x && this.x-this.size-Math.abs(this.vx)-3<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)+3>squares[i].y && this.y-this.size-Math.abs(this.vy)-3<squares[i].y+squareSize){
                     squares[i].draw()
                 }
             }
@@ -143,7 +143,7 @@ class Bullet{
         }
         if(this.y<this.size){
             for(let i=0; i<squares.length; i++){
-                if(this.x+this.size+Math.abs(this.vx)>squares[i].x && this.x-this.size-Math.abs(this.vx)<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)>squares[i].y && this.y-this.size-Math.abs(this.vy)<squares[i].y+squareSize){
+                if(this.x+this.size+Math.abs(this.vx)+3>squares[i].x && this.x-this.size-Math.abs(this.vx)-3<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)+3>squares[i].y && this.y-this.size-Math.abs(this.vy)-3<squares[i].y+squareSize){
                     squares[i].draw()
                 }
             }
@@ -151,7 +151,7 @@ class Bullet{
         }
         if(this.y>800-this.size){
             for(let i=0; i<squares.length; i++){
-                if(this.x+this.size+Math.abs(this.vx)>squares[i].x && this.x-this.size-Math.abs(this.vx)<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)>squares[i].y && this.y-this.size-Math.abs(this.vy)<squares[i].y+squareSize){
+                if(this.x+this.size+Math.abs(this.vx)+3>squares[i].x && this.x-this.size-Math.abs(this.vx)-3<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)+3>squares[i].y && this.y-this.size-Math.abs(this.vy)-3<squares[i].y+squareSize){
                     squares[i].draw()
                 }
             }
@@ -163,7 +163,7 @@ class Bullet{
                 if(c.find(co => co == squares[i].color) == undefined){
                     c.push(squares[i].color)
                 }
-                if(this.x+this.size+Math.abs(this.vx)>squares[i].x && this.x-this.size-Math.abs(this.vx)<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)>squares[i].y && this.y-this.size-Math.abs(this.vy)<squares[i].y+squareSize){
+                if(this.x+this.size+Math.abs(this.vx)+3>squares[i].x && this.x-this.size-Math.abs(this.vx)-3<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)+3>squares[i].y && this.y-this.size-Math.abs(this.vy)-3<squares[i].y+squareSize){
                     if(squares[i].color != this.color && this.mass>0){
                         this.mass -= 1
                         squares[i].color = this.color
