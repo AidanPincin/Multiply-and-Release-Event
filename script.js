@@ -396,7 +396,6 @@ function doMath(){
     }
 }
 let fastforward = false
-const worker = new Worker('worker.js')
 function mainLoop(){
     doMath()
     T+=1
@@ -414,9 +413,6 @@ function mainLoop(){
     ctx.fillRect(320,730,210,20)
     for(let i=0; i<marbles.length; i++){
         marbles[i].draw()
-    }
-    for(let i=0; i<squares.length; i++){
-        //squares[i].draw()
     }
     for(let i=0; i<towers.length; i++){
         towers[i].draw()
