@@ -39,10 +39,10 @@ class Marble{
                         m2.vx += impulse*m1.mass*dx
                         m2.vy += impulse*m1.mass*dy
                         const dif = dist-collisionDist
-                        m1.x+=dx*dif/2*(m2.mass/(m1.mass+m2.mass))
-                        m1.y+=dy*dif/2*(m2.mass/(m1.mass+m2.mass))
-                        m2.x-=dx*dif/2*(m1.mass/(m1.mass+m2.mass))
-                        m2.y-=dy*dif/2*(m1.mass/(m1.mass+m2.mass))
+                        m1.x+=dx*dif*(m2.mass/(m1.mass+m2.mass))
+                        m1.y+=dy*dif*(m2.mass/(m1.mass+m2.mass))
+                        m2.x-=dx*dif*(m1.mass/(m1.mass+m2.mass))
+                        m2.y-=dy*dif*(m1.mass/(m1.mass+m2.mass))
                     }
                 }
             }
@@ -126,15 +126,35 @@ class Bullet{
     math(){
         this.size = 7+Math.sqrt(Math.sqrt(Math.pow(this.mass,1.5)))
         if(this.x<600+this.size){
+            for(let i=0; i<squares.length; i++){
+                if(this.x+this.size+Math.abs(this.vx)>squares[i].x && this.x-this.size-Math.abs(this.vx)<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)>squares[i].y && this.y-this.size-Math.abs(this.vy)<squares[i].y+squareSize){
+                    squares[i].draw()
+                }
+            }
             this.x = 1400-this.size
         }
         if(this.x>1400-this.size){
+            for(let i=0; i<squares.length; i++){
+                if(this.x+this.size+Math.abs(this.vx)>squares[i].x && this.x-this.size-Math.abs(this.vx)<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)>squares[i].y && this.y-this.size-Math.abs(this.vy)<squares[i].y+squareSize){
+                    squares[i].draw()
+                }
+            }
             this.x = 600+this.size
         }
         if(this.y<this.size){
+            for(let i=0; i<squares.length; i++){
+                if(this.x+this.size+Math.abs(this.vx)>squares[i].x && this.x-this.size-Math.abs(this.vx)<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)>squares[i].y && this.y-this.size-Math.abs(this.vy)<squares[i].y+squareSize){
+                    squares[i].draw()
+                }
+            }
             this.y = 800-this.size
         }
         if(this.y>800-this.size){
+            for(let i=0; i<squares.length; i++){
+                if(this.x+this.size+Math.abs(this.vx)>squares[i].x && this.x-this.size-Math.abs(this.vx)<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)>squares[i].y && this.y-this.size-Math.abs(this.vy)<squares[i].y+squareSize){
+                    squares[i].draw()
+                }
+            }
             this.y = this.size
         }
         if(this.detect == true){
@@ -143,12 +163,15 @@ class Bullet{
                 if(c.find(co => co == squares[i].color) == undefined){
                     c.push(squares[i].color)
                 }
-                if(this.x+this.size>squares[i].x && this.x-this.size<squares[i].x+squareSize && this.y+this.size>squares[i].y && this.y-this.size<squares[i].y+squareSize && this.mass>0 && squares[i].color != this.color){
-                    this.mass -= 1
-                    squares[i].color = this.color
-                    if(this.mass == 0){
-                        bullets.splice(bullets.findIndex(b => b == this),1)
+                if(this.x+this.size+Math.abs(this.vx)>squares[i].x && this.x-this.size-Math.abs(this.vx)<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)>squares[i].y && this.y-this.size-Math.abs(this.vy)<squares[i].y+squareSize){
+                    if(squares[i].color != this.color && this.mass>0){
+                        this.mass -= 1
+                        squares[i].color = this.color
+                        if(this.mass == 0){
+                            bullets.splice(bullets.findIndex(b => b == this),1)
+                        }
                     }
+                    squares[i].draw()
                 }
             }
             if(c.length==1){
@@ -200,10 +223,10 @@ class Bullet{
                         b1.vy -= impulse*b2.mass*dy
                         b2.vx += impulse*b1.mass*dx
                         const dif = dist-collisionDist
-                        b1.x+=dx*dif/2*(b2.mass/(b1.mass+b2.mass))
-                        b1.y+=dy*dif/2*(b2.mass/(b1.mass+b2.mass))
-                        b2.x-=dx*dif/2*(b1.mass/(b1.mass+b2.mass))
-                        b2.y-=dy*dif/2*(b1.mass/(b1.mass+b2.mass))
+                        b1.x+=dx*dif*(b2.mass/(b1.mass+b2.mass))
+                        b1.y+=dy*dif*(b2.mass/(b1.mass+b2.mass))
+                        b2.x-=dx*dif*(b1.mass/(b1.mass+b2.mass))
+                        b2.y-=dy*dif*(b1.mass/(b1.mass+b2.mass))
                     }
                 }
             }
@@ -262,6 +285,12 @@ class Tower{
         }
         else{
             this.angle += Math.PI/500
+        }
+        let r = this.s+29+Math.sqrt(Math.sqrt(Math.pow(this.size,1.75)))
+        for(let i=0; i<squares.length; i++){
+            if (this.x+r>squares[i].x && this.x-r<squares[i].x+squareSize && this.y+r>squares[i].y && this.y-r<squares[i].y+squareSize){
+                squares[i].draw()
+            }
         }
     }
     release(){
@@ -367,14 +396,15 @@ function doMath(){
     }
 }
 let fastforward = false
+const worker = new Worker('worker.js')
 function mainLoop(){
     doMath()
-    time+=1
+    T+=1
     if(fastforward == true){
         fastForward()
     }
     ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0,0,1400,800)
+    ctx.fillRect(0,0,600,800)
     ctx.fillStyle = '#000000'
     ctx.fillRect(90,0,20,800)
     ctx.fillRect(530,0,20,800)
@@ -386,7 +416,7 @@ function mainLoop(){
         marbles[i].draw()
     }
     for(let i=0; i<squares.length; i++){
-        squares[i].draw()
+        //squares[i].draw()
     }
     for(let i=0; i<towers.length; i++){
         towers[i].draw()
@@ -399,10 +429,14 @@ function mainLoop(){
     ctx.fillText(fps,50,50)
     requestAnimationFrame(mainLoop)
 }
+let T = 0
+for(let i=0; i<squares.length; i++){
+    squares[i].draw()
+}
 mainLoop()
 setInterval(() => {
-    fps = time
-    time = 0
+    fps = T
+    T = 0
 },1000)
 function fastForward(){
     for(let i=0; i<600; i++){
