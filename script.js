@@ -325,8 +325,161 @@ class Tower{
         ctx.fillText(this.size,this.x-width/2,this.y+16/3)
     }
 }
+class Slider{
+    constructor(x,y,min,max,length,name,description,num){
+        this.x = x
+        this.y = y
+        this.min = min
+        this.max = max
+        this.length = length
+        this.drag = false
+        this.num = num
+        this.name = name
+        this.description = description
+    }
+    draw(){
+        ctx.beginPath()
+        ctx.save()
+        ctx.translate(this.x,this.y+10)
+        ctx.rotate(Math.PI/2)
+        ctx.arc(0,0,10,0,Math.PI,false)
+        ctx.restore()
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.save()
+        ctx.translate(this.x+this.length,this.y+10)
+        ctx.rotate(Math.PI*1.5)
+        ctx.arc(0,0,10,0,Math.PI,false)
+        ctx.restore()
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.moveTo(this.x,this.y)
+        ctx.lineTo(this.x+this.length,this.y)
+        ctx.moveTo(this.x,this.y+20)
+        ctx.lineTo(this.x+this.length,this.y+20)
+        ctx.stroke()
+        ctx.fillStyle = '#000000'
+        ctx.font = '24px Arial'
+        let width = ctx.measureText(this.min).width
+        ctx.fillText(this.min,this.x-width-15,this.y+18)
+        ctx.fillText(this.max,this.x+this.length+15,this.y+18)
+        const x = this.x+((this.num-this.min)/(this.max-this.min))*this.length
+        ctx.beginPath()
+        ctx.arc(x,this.y+10,10,0,Math.PI*2,false)
+        ctx.fillStyle = '#7d7d7d'
+        ctx.fill()
+        ctx.fillStyle = '#000000'
+        width = ctx.measureText(this.num).width
+        ctx.fillText(this.num,x-width/2,this.y+44)
+        width = ctx.measureText(this.name).width
+        ctx.fillText(this.name,this.x+this.length/2-width/2,this.y-70)
+        ctx.font = '16px Arial'
+        let index = this.description.search('\n')
+        if(index != -1){
+            width = ctx.measureText(this.description.slice(0,index)).width
+            ctx.fillText(this.description.slice(0,index),this.x+this.length/2-width/2,this.y-45)
+            width = ctx.measureText(this.description.slice(index,this.description.length)).width
+            ctx.fillText(this.description.slice(index,this.description.length),this.x+this.length/2-width/2,this.y-25)
+        }
+        else{
+            width = ctx.measureText(this.description).width
+            ctx.fillText(this.description,this.x+this.length/2-width/2,this.y-35)
+        }
+    }
+    onDown(e){
+        let x = 0
+        let y = 0
+        if(e.type == 'mousedown'){
+            x = e.pageX-10
+            y = e.pageY-10
+        }
+        if(e.type == 'touchstart'){
+            x = e.changedTouches[0].pageX-10
+            y = e.changedTouches[0].pageY-10
+        }
+        if(y>=this.y-5 && y<=this.y+25 && x>=this.x-10 && x<=this.x+this.length+10){
+            const num = Math.round(this.min+((x-this.x)/this.length)*(this.max-this.min))
+            if(num<this.min){
+                this.num = this.min
+            }
+            else if(num>this.max){
+                this.num = this.max
+            }
+            else{
+                this.num = num
+            }
+            this.drag = true
+        }
+    }
+    onMove(e){
+        if(this.drag == true){
+            let x = 0
+            let y = 0
+            if(e.type == 'mousemove'){
+                x = e.pageX-10
+                y = e.pageY-10
+            }
+            if(e.type == 'touchmove'){
+                x = e.changedTouches[0].pageX-10
+                y = e.changedTouches[0].pageY-10
+            }
+            if(y>=this.y-5 && y<=this.y+25 && x>=this.x-10 && x<=this.x+this.length+10){
+                const num = Math.round(this.min+((x-this.x)/this.length)*(this.max-this.min))
+                if(num<this.min){
+                    this.num = this.min
+                }
+                else if(num>this.max){
+                    this.num = this.max
+                }
+                else{
+                    this.num = num
+                }
+            }
+        }
+    }
+}
+class Button{
+    constructor(x,y,txt,fn){
+        this.x = x
+        this.y = y
+        this.txt = txt
+        this.fn = fn
+    }
+    draw(){
+        ctx.fillStyle = '#0000ff'
+        ctx.fillRect(this.x,this.y,125,40)
+        ctx.font = '24px Arial'
+        ctx.fillStyle = '#000000'
+        const width = ctx.measureText(this.txt).width
+        ctx.fillText(this.txt,this.x+62.5-width/2,this.y+28)
+    }
+    wasClicked(e){
+        let x = 0
+        let y = 0
+        if(e.type == 'mousedown'){
+            x = e.pageX-10
+            y = e.pageY-10
+        }
+        if(e.type == 'touchstart'){
+            x = e.changedTouches[0].pageX-10
+            y = e.changedTouches[0].pageY-10
+        }
+        if(x>=this.x && x<=this.x+125 && y>=this.y && y<=this.y+40){
+            this.fn()
+        }
+
+    }
+}
 const colors = ['green','purple','red','yellow','pink','blue','turquoise','black','grey','orange','brown','violet','#00ff00','#7d0000','#00007d','#7d7d00']
 const constantColors = ['green','purple','red','yellow','pink','blue','turquoise','black','grey','orange','brown','violet','#00ff00','#7d0000','#00007d','#7d7d00']
+const sliders = [new Slider(600,200,15,180,200,'Cooldown(in seconds)','Interval at which more marbles\nare added to the dropper',120)]
+const startButton = new Button(650,650,'START',function(){
+    settings = false
+    for(let i=0; i<squares.length; i++){
+        squares[i].draw()
+    }
+    coolDown = sliders[0].num
+})
 const marbles = []
 const squares = []
 const towers = []
@@ -334,6 +487,7 @@ const bullets = []
 let fps = 0
 let t = 0
 let time = 0
+let settings = true
 for(let i=0; i<16; i++){
     let row = i
     let col = 0
@@ -368,6 +522,24 @@ for(let i=0; i<6; i++){
         marbles.push(new Marble(120+i*80,180+k*160,20,infinity,'#000000',0,0,false))
     }
 }
+function up(){
+    if(settings == true){
+        for(let i=0; i<sliders.length; i++){
+            sliders[i].drag = false
+        }
+    }
+}
+function down(e){
+    if(settings == true){
+        sliders.filter(s => s.onDown(e))
+        startButton.wasClicked(e)
+    }
+}
+function move(e){
+    if(settings == true){
+        sliders.filter(s => s.onMove(e))
+    }
+}
 function doMath(){
     t += 1
     if(t/60 >= coolDown){
@@ -386,59 +558,57 @@ function doMath(){
         bullets[i].math()
     }
 }
-let fastforward = false
 function mainLoop(){
-    doMath()
-    T+=1
-    if(fastforward == true){
-        fastForward()
+    if(settings == true){
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0,0,1500,800)
+        for(let i=0; i<sliders.length; i++){
+            sliders[i].draw()
+        }
+        startButton.draw()
     }
-    ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0,0,600,800)
-    ctx.fillRect(1400,0,200,800)
-    ctx.fillStyle = '#000000'
-    ctx.fillRect(90,0,20,800)
-    ctx.fillRect(530,0,20,800)
-    ctx.fillStyle = '#00ff00'
-    ctx.fillRect(110,730,210,20)
-    ctx.fillStyle = '#ff0000'
-    ctx.fillRect(320,730,210,20)
-    for(let i=0; i<marbles.length; i++){
-        marbles[i].draw()
-    }
-    for(let i=0; i<towers.length; i++){
-        towers[i].draw()
-    }
-    for(let i=0; i<bullets.length; i++){
-        bullets[i].draw()
-    }
-    ctx.font = '24px Arial'
-    ctx.fillStyle = '#000000'
-    ctx.fillText(fps,50,50)
-    for(let i=0; i<constantColors.length; i++){
-        let txt = (squares.filter(s => s.color == constantColors[i]).length/squares.length*100).toFixed(2)
-        ctx.fillStyle = constantColors[i]
-        ctx.fillText(txt+'%',1425,50+40*i)
+    else{
+        doMath()
+        T+=1
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0,0,600,800)
+        ctx.fillRect(1400,0,200,800)
+        ctx.fillStyle = '#000000'
+        ctx.fillRect(90,0,20,800)
+        ctx.fillRect(530,0,20,800)
+        ctx.fillStyle = '#00ff00'
+        ctx.fillRect(110,730,210,20)
+        ctx.fillStyle = '#ff0000'
+        ctx.fillRect(320,730,210,20)
+        for(let i=0; i<marbles.length; i++){
+            marbles[i].draw()
+        }
+        for(let i=0; i<towers.length; i++){
+            towers[i].draw()
+        }
+        for(let i=0; i<bullets.length; i++){
+            bullets[i].draw()
+        }
+        ctx.font = '24px Arial'
+        ctx.fillStyle = '#000000'
+        ctx.fillText(fps,50,50)
+        for(let i=0; i<constantColors.length; i++){
+            let txt = (squares.filter(s => s.color == constantColors[i]).length/squares.length*100).toFixed(2)
+            ctx.fillStyle = constantColors[i]
+            ctx.fillText(txt+'%',1425,50+40*i)
+        }
     }
     requestAnimationFrame(mainLoop)
 }
 let T = 0
-for(let i=0; i<squares.length; i++){
-    squares[i].draw()
-}
 mainLoop()
 setInterval(() => {
     fps = T
     T = 0
 },1000)
-function fastForward(){
-    for(let i=0; i<600; i++){
-        doMath()
-    }
-    fastforward = false
-}
-window.addEventListener('keypress',function(e){
-    if(e.key == 'f' && fastforward == false){
-        fastforward = true
-    }
-})
+window.addEventListener('mousedown',function(e){down(e)})
+window.addEventListener('mousemove',function(e){move(e)})
+window.addEventListener('mouseup',function(){up()})
+window.addEventListener('touchstart',function(e){down(e)})
+window.addEventListener('touchmove',function(e){move(e)})
+window.addEventListener('touchend',function(){up()})
