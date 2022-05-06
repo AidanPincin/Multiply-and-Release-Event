@@ -4,7 +4,7 @@ let green = 0
 let red = 0
 let squareSize = 10
 let accuracy = 20
-let coolDown = 60
+let coolDown = 15
 class Marble{
     constructor(x,y,r,mass,color,vx,vy,gravity=true){
         this.x = x
@@ -121,7 +121,6 @@ class Bullet{
         this.color = color
         this.mass = mass
         this.size = 7+Math.sqrt(Math.sqrt(Math.pow(this.mass,1.5)))
-        this.detect = true
     }
     math(){
         this.size = 7+Math.sqrt(Math.sqrt(Math.pow(this.mass,1.5)))
@@ -157,25 +156,16 @@ class Bullet{
             }
             this.y = this.size
         }
-        if(this.detect == true){
-            const c = []
-            for(let i=0; i<squares.length; i++){
-                if(c.find(co => co == squares[i].color) == undefined){
-                    c.push(squares[i].color)
-                }
-                if(this.x+this.size+Math.abs(this.vx)+3>squares[i].x && this.x-this.size-Math.abs(this.vx)-3<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)+3>squares[i].y && this.y-this.size-Math.abs(this.vy)-3<squares[i].y+squareSize){
-                    if(squares[i].color != this.color && this.mass>0){
-                        this.mass -= 1
-                        squares[i].color = this.color
-                        if(this.mass == 0){
-                            bullets.splice(bullets.findIndex(b => b == this),1)
-                        }
+        for(let i=0; i<squares.length; i++){
+            if(this.x+this.size+Math.abs(this.vx)+3>squares[i].x && this.x-this.size-Math.abs(this.vx)-3<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)+3>squares[i].y && this.y-this.size-Math.abs(this.vy)-3<squares[i].y+squareSize){
+                if(squares[i].color != this.color && this.mass>0){
+                    this.mass -= 1
+                    squares[i].color = this.color
+                    if(this.mass == 0){
+                        bullets.splice(bullets.findIndex(b => b == this),1)
                     }
-                    squares[i].draw()
                 }
-            }
-            if(c.length==1){
-                this.detect = false
+                squares[i].draw()
             }
         }
         if(towers.length>1){
@@ -336,6 +326,7 @@ class Tower{
     }
 }
 const colors = ['green','purple','red','yellow','pink','blue','turquoise','black','grey','orange','brown','violet','#00ff00','#7d0000','#00007d','#7d7d00']
+const constantColors = ['green','purple','red','yellow','pink','blue','turquoise','black','grey','orange','brown','violet','#00ff00','#7d0000','#00007d','#7d7d00']
 const marbles = []
 const squares = []
 const towers = []
@@ -404,6 +395,7 @@ function mainLoop(){
     }
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0,0,600,800)
+    ctx.fillRect(1400,0,200,800)
     ctx.fillStyle = '#000000'
     ctx.fillRect(90,0,20,800)
     ctx.fillRect(530,0,20,800)
@@ -423,6 +415,11 @@ function mainLoop(){
     ctx.font = '24px Arial'
     ctx.fillStyle = '#000000'
     ctx.fillText(fps,50,50)
+    for(let i=0; i<constantColors.length; i++){
+        let txt = (squares.filter(s => s.color == constantColors[i]).length/squares.length*100).toFixed(2)
+        ctx.fillStyle = constantColors[i]
+        ctx.fillText(txt+'%',1425,50+40*i)
+    }
     requestAnimationFrame(mainLoop)
 }
 let T = 0
