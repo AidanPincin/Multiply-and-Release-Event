@@ -86,7 +86,7 @@ class Marble{
                     this.y = 800-this.r
                 }
                 if(this.y>730-this.r && this.x>110+this.r && this.y<740+this.r){
-                    if(this.x<330){
+                    if(this.x<320){
                         towers.find(t => t.color == this.color).size *= 2
                     }
                     else{
