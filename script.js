@@ -4,7 +4,7 @@ let green = 0
 let red = 0
 let squareSize = 10
 let accuracy = 20
-let coolDown = 15
+let coolDown = 120
 class Marble{
     constructor(x,y,r,mass,color,vx,vy,gravity=true){
         this.x = x
