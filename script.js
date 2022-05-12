@@ -164,7 +164,7 @@ class Bullet{
             const dist = Math.sqrt(Math.pow(x_dist,2)+Math.pow(y_dist,2))
             const x = this.x+(x_dist/dist)*this.size
             const y = this.y+(y_dist/dist)*this.size
-            if(x+Math.abs(this.vx)+3>squares[i].x && x-Math.abs(this.vx)-3<squares[i].x+squareSize && y+Math.abs(this.vy)+3>squares[i].y && y-Math.abs(this.vy)-3<squares[i].y+squareSize){
+            if(x+Math.abs(this.vx)+20/squareSize>squares[i].x && x-Math.abs(this.vx)-20/squareSize<squares[i].x+squareSize && y+Math.abs(this.vy)+20/squareSize>squares[i].y && y-Math.abs(this.vy)-20/squareSize<squares[i].y+squareSize){
                 if(squares[i].color != this.color && this.mass>0){
                     this.mass -= 1
                     squares[i].color = this.color
@@ -183,6 +183,12 @@ class Bullet{
                 const collisionDist = this.size+t.s
                 const dist = Math.sqrt(Math.pow(x_dist,2)+Math.pow(y_dist,2))
                 if(dist<collisionDist && this.color != towers[i].color){
+                    const r = t.s+(29/7)*towerSize+Math.sqrt(Math.sqrt(Math.pow(t.size,1.75)))
+                    for(let i=0; i<squares.length; i++){
+                        if(squares[i].x+squareSize>=t.x-r && squares[i].x<=t.x+r && squares[i].y+squareSize>=t.y-r && squares[i].y<=t.y+r){
+                            squares[i].draw()
+                        }
+                    }
                     let s = t.size
                     t.size -= this.mass
                     this.mass -= s
@@ -324,7 +330,7 @@ class Tower{
         ctx.translate(this.x,this.y)
         ctx.fillStyle = this.color
         ctx.rotate(this.angle)
-        ctx.fillRect(this.s-1,(-8/7)*towerSize,(31/7)*towerSize+Math.sqrt(Math.sqrt(Math.pow(this.size,1.75)))-this.s+1,(1/7)*towerSize+Math.sqrt(Math.sqrt(this.size)))
+        ctx.fillRect(this.s-1,(-7/7)*towerSize,(32/7)*towerSize+Math.sqrt(Math.sqrt(Math.pow(this.size,1.75)))-this.s,Math.sqrt(Math.sqrt(this.size)))
         ctx.fillRect(0,(-5/7)*towerSize,(29/7)*towerSize+Math.sqrt(Math.sqrt(Math.pow(this.size,1.75))),(9/7)*towerSize+Math.sqrt(Math.sqrt(this.size)))
         ctx.strokeRect(0,(-5/7)*towerSize,(29/7)*towerSize+Math.sqrt(Math.sqrt(Math.pow(this.size,1.75))),(9/7)*towerSize+Math.sqrt(Math.sqrt(this.size)))
         ctx.restore()
@@ -390,18 +396,7 @@ class Slider{
         ctx.fillText(this.num,x-width/2,this.y+44)
         width = ctx.measureText(this.name).width
         ctx.fillText(this.name,this.x+this.length/2-width/2,this.y-70)
-        ctx.font = '16px Arial'
-        let index = this.description.search('\n')
-        if(index != -1){
-            width = ctx.measureText(this.description.slice(0,index)).width
-            ctx.fillText(this.description.slice(0,index),this.x+this.length/2-width/2,this.y-45)
-            width = ctx.measureText(this.description.slice(index,this.description.length)).width
-            ctx.fillText(this.description.slice(index,this.description.length),this.x+this.length/2-width/2,this.y-25)
-        }
-        else{
-            width = ctx.measureText(this.description).width
-            ctx.fillText(this.description,this.x+this.length/2-width/2,this.y-35)
-        }
+        txt(this.description,this.x+this.length/2,this.y-50)
     }
     onDown(e){
         let x = 0
@@ -470,18 +465,7 @@ class Choice{
         ctx.fillStyle = '#000000'
         let width = ctx.measureText(this.name).width
         ctx.fillText(this.name,this.x-width/2,this.y-70)
-        ctx.font = '16px Arial'
-        let index = this.description.search('\n')
-        if(index != -1){
-            width = ctx.measureText(this.description.slice(0,index)).width
-            ctx.fillText(this.description.slice(0,index),this.x-width/2,this.y-45)
-            width = ctx.measureText(this.description.slice(index,this.description.length)).width
-            ctx.fillText(this.description.slice(index,this.description.length),this.x-width/2,this.y-25)
-        }
-        else{
-            width = ctx.measureText(this.description).width
-            ctx.fillText(this.description,this.x-width/2,this.y-35)
-        }
+        txt(this.description,this.x,this.y-50)
         for(let i=0; i<this.choices.length; i++){
             ctx.beginPath()
             ctx.arc(this.x-this.length+i*75,this.y+20,10,0,Math.PI*2,false)
@@ -490,7 +474,7 @@ class Choice{
             width = ctx.measureText(this.choices[i]).width
             ctx.fillText(this.choices[i],this.x-width/2-this.length+i*75,this.y+52)
         }
-        index = this.choices.findIndex(i => i == this.chosen)
+        let index = this.choices.findIndex(i => i == this.chosen)
         ctx.beginPath()
         ctx.arc(this.x-this.length+index*75,this.y+20,8,0,Math.PI*2,false)
         ctx.fillStyle = '#0000ff'
@@ -544,10 +528,11 @@ class Button{
 }
 const colors = ['green','purple','red','yellow','pink','blue','turquoise','black','grey','orange','brown','violet','#00ff00','#7d0000','#00007d','#7d7d00']
 const constantColors = ['green','purple','red','yellow','pink','blue','turquoise','black','grey','orange','brown','violet','#00ff00','#7d0000','#00007d','#7d7d00']
-const sliders = [new Slider(600,100,15,180,200,'Cooldown(in seconds)','Interval at which more marbles\nare added to the dropper',120)]
+const sliders = [new Slider(600,100,15,180,200,'Cooldown(in seconds)','Interval at which more marbles\nare added to the dropper',120), new Slider(600,450,-50,25,200,'Additional Multiply Chance(%)','at 0 there is a 50/50 chance\nof multiplying or releasing',0)]
 const startButton = new Button(650,650,'START',function(){
     settings = false
     squareSize = choices[0].chosen
+    multiplyChance = sliders[1].num*4.2
     for(let i=0; i<16; i++){
         for(let x=0; x<200/squareSize; x++){
             for(let y=0; y<200/squareSize; y++){
@@ -575,7 +560,7 @@ const startButton = new Button(650,650,'START',function(){
     }
     coolDown = sliders[0].num
 })
-const choices = [new Choice(700,300,'Square Size','Smaller means more squares/territory\nBigger means less squares/territory',[5,10,20,40],10)]
+const choices = [new Choice(700,266,'Square Size','Smaller means more squares/territory\nBigger means less squares/territory',[5,10,20,40],10)]
 const marbles = []
 const squares = []
 const towers = []
@@ -633,6 +618,27 @@ function doMath(){
         bullets[i].math()
     }
 }
+function txt(txt,x,y){
+    let text = txt+'.'
+    let index = text.search('\n')
+    ctx.font = '16px Arial'
+    ctx.fillStyle = '#000000'
+    if(index != -1){
+        let l = 0
+        while(index != -1){
+            index = text.search('\n')
+            const width = ctx.measureText(text.slice(0,index)).width
+            ctx.fillText(text.slice(0,index),x-width/2,y+16/3+l*20)
+            l += 1
+            text = text.slice(index+1,text.length)
+
+        }
+    }
+    else{
+        const width = ctx.measureText(text.slice(0,index)).width
+        ctx.fillText(text.slice(0,index),x-width/2,y+16/3+l*25)
+    }
+}
 function mainLoop(){
     if(settings == true){
         ctx.fillStyle = '#ffffff'
@@ -644,6 +650,7 @@ function mainLoop(){
             choices[i].draw()
         }
         startButton.draw()
+        txt('Note: The additional multiply chance will increase over time\ndepending on how many marbles are in the dropper\nand the cooldown time and the square size\nbut will not go above 25%(so 75% in total)',250,350)
     }
     else{
         doMath()
@@ -686,7 +693,7 @@ setInterval(() => {
 },1000)
 setInterval(() => {
     if(marbles.length>100 && multiplyChance<105){
-        multiplyChance += (0.1*180/coolDown)/60
+        multiplyChance += (0.1*180/coolDown+0.5*Math.sqrt(squares.length)/Math.sqrt(25600))/60
     }
 },1000/60)
 window.addEventListener('mousedown',function(e){down(e)})
