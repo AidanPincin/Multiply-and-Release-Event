@@ -5,8 +5,9 @@ let red = 0
 let squareSize = 10
 let accuracy = 20
 let coolDown = 120
-let multiplyChance = 0
 let towerSize = 7
+let players = 16
+let col = 16
 class Marble{
     constructor(x,y,r,mass,color,vx,vy,gravity=true){
         this.x = x
@@ -88,7 +89,7 @@ class Marble{
                     this.y = 800-this.r
                 }
                 if(this.y>730-this.r && this.x>110+this.r && this.y<740+this.r){
-                    if(this.x<320+multiplyChance && towers.find(t => t.color == this.color).size<50000){
+                    if(this.x<320+multiplyChance && towers.find(t => t.color == this.color).size<25000){
                         towers.find(t => t.color == this.color).size *= 2
                     }
                     else{
@@ -164,7 +165,7 @@ class Bullet{
             const dist = Math.sqrt(Math.pow(x_dist,2)+Math.pow(y_dist,2))
             const x = this.x+(x_dist/dist)*this.size
             const y = this.y+(y_dist/dist)*this.size
-            if(x+Math.abs(this.vx)+20/squareSize>squares[i].x && x-Math.abs(this.vx)-20/squareSize<squares[i].x+squareSize && y+Math.abs(this.vy)+20/squareSize>squares[i].y && y-Math.abs(this.vy)-20/squareSize<squares[i].y+squareSize){
+            if(x+Math.abs(this.vx)+30/squareSize>squares[i].x && x-Math.abs(this.vx)-30/squareSize<squares[i].x+squareSize && y+Math.abs(this.vy)+30/squareSize>squares[i].y && y-Math.abs(this.vy)-30/squareSize<squares[i].y+squareSize){
                 if(squares[i].color != this.color && this.mass>0){
                     this.mass -= 1
                     squares[i].color = this.color
@@ -198,6 +199,7 @@ class Bullet{
                         for(let i=0; i<ms.length; i++){
                             marbles.splice(marbles.findIndex(ma => ma == ms[i]),1)
                         }
+                        players -= 1
                         towers.splice(towers.findIndex(to => to == t),1)
                     }
                     if(this.mass<=0){
@@ -291,12 +293,6 @@ class Tower{
         }
         else{
             this.angle += Math.PI/500
-        }
-        let r = this.s+(29/7)*towerSize+Math.sqrt(Math.sqrt(Math.pow(this.size,1.75)))
-        for(let i=0; i<squares.length; i++){
-            if (this.x+r>squares[i].x && this.x-r<squares[i].x+squareSize && this.y+r>squares[i].y && this.y-r<squares[i].y+squareSize && squares[i].color != this.color){
-                squares[i].draw()
-            }
         }
     }
     release(){
@@ -465,28 +461,38 @@ class Choice{
         ctx.fillStyle = '#000000'
         let width = ctx.measureText(this.name).width
         ctx.fillText(this.name,this.x-width/2,this.y-70)
-        txt(this.description,this.x,this.y-50)
+        if(this.description != undefined){
+            txt(this.description,this.x,this.y-50)
+        }
+        let y = 0
+            if(this.description == undefined){
+                y = 60
+            }
         for(let i=0; i<this.choices.length; i++){
             ctx.beginPath()
-            ctx.arc(this.x-this.length+i*75,this.y+20,10,0,Math.PI*2,false)
+            ctx.arc(this.x-this.length+i*75,this.y+20-y,10,0,Math.PI*2,false)
             ctx.stroke()
             ctx.font = '24px Arial'
             width = ctx.measureText(this.choices[i]).width
-            ctx.fillText(this.choices[i],this.x-width/2-this.length+i*75,this.y+52)
+            ctx.fillText(this.choices[i],this.x-width/2-this.length+i*75,this.y+52-y)
         }
         let index = this.choices.findIndex(i => i == this.chosen)
         ctx.beginPath()
-        ctx.arc(this.x-this.length+index*75,this.y+20,8,0,Math.PI*2,false)
+        ctx.arc(this.x-this.length+index*75,this.y+20-y,8,0,Math.PI*2,false)
         ctx.fillStyle = '#0000ff'
         ctx.fill()
 
     }
     wasClicked(e){
+        let y2 = 0
+        if(this.description == undefined){
+            y2 = 60
+        }
         const x = e.pageX-10
         const y = e.pageY-10
         for(let i=0; i<this.choices.length; i++){
             const x_dist = (this.x-this.length+i*75)-x
-            const y_dist = (this.y+20)-y
+            const y_dist = (this.y+20-y2)-y
             const dist = Math.sqrt(Math.pow(x_dist,2)+Math.pow(y_dist,2))
             if(dist<=10){
                 this.chosen = this.choices[i]
@@ -526,41 +532,48 @@ class Button{
 
     }
 }
-const colors = ['green','purple','red','yellow','pink','blue','turquoise','black','grey','orange','brown','violet','#00ff00','#7d0000','#00007d','#7d7d00']
-const constantColors = ['green','purple','red','yellow','pink','blue','turquoise','black','grey','orange','brown','violet','#00ff00','#7d0000','#00007d','#7d7d00']
+const colors = ['red','yellow','lime','blue','orange','indigo','violet','pink','purple','turquoise','gold','green','maroon','navy','coral','teal',
+'black','olivedrab','darkgoldenrod','crimson','springgreen','darkslategray','cadetblue','grey','chocolate']
+const constantColors = ['red','yellow','lime','blue','orange','indigo','violet','pink','purple','turquoise','gold','green','maroon','navy','coral','teal',
+'black','olivedrab','darkgoldenrod','crimson','springgreen','darkslategray','cadetblue','grey','chocolate']
 const sliders = [new Slider(600,100,15,180,200,'Cooldown(in seconds)','Interval at which more marbles\nare added to the dropper',120), new Slider(600,450,-50,25,200,'Additional Multiply Chance(%)','at 0 there is a 50/50 chance\nof multiplying or releasing',0)]
 const startButton = new Button(650,650,'START',function(){
     settings = false
     squareSize = choices[0].chosen
     multiplyChance = sliders[1].num*4.2
-    for(let i=0; i<16; i++){
-        for(let x=0; x<200/squareSize; x++){
-            for(let y=0; y<200/squareSize; y++){
+    players = choices[1].chosen
+    col = players
+    for(let i=0; i<players; i++){
+        for(let x=0; x<(800/Math.sqrt(players))/squareSize; x++){
+            for(let y=0; y<(800/Math.sqrt(players))/squareSize; y++){
                 let row = i
                 let col = 0
-                while(row>3){
-                    row -= 4
+                while(row>Math.sqrt(players)-1){
+                    row -= Math.sqrt(players)
                     col += 1
                 }
-                squares.push(new Square(600+col*200+x*squareSize,row*200+y*squareSize,colors[i]))
+                squares.push(new Square(600+col*(800/Math.sqrt(players))+x*squareSize,row*(800/Math.sqrt(players))+y*squareSize,colors[i]))
             }
         }
     }
-    for(let i=0; i<16; i++){
+    for(let i=0; i<players; i++){
         let row = i
         let col = 0
-        while(row>3){
+        while(row>Math.sqrt(players)-1){
+            row -= Math.sqrt(players)
             col += 1
-            row -= 4
         }
-        towers.push(new Tower(700+col*200,100+row*200,colors[i]))
+        towers.push(new Tower(600+(800/Math.sqrt(players))/2+col*(800/Math.sqrt(players)),(800/Math.sqrt(players))/2+row*(800/Math.sqrt(players)),colors[i]))
     }
     for(let i=0; i<squares.length; i++){
         squares[i].draw()
     }
+    for (let i=0; i<players; i++){
+        marbles.push(new Marble(320+i,10,8,1,colors[i],Math.random()*5-2.5,Math.random()*5-2.5))
+    }
     coolDown = sliders[0].num
 })
-const choices = [new Choice(700,266,'Square Size','Smaller means more squares/territory\nBigger means less squares/territory',[5,10,20,40],10)]
+const choices = [new Choice(700,266,'Square Size','Smaller means more squares/territory\nBigger means less squares/territory',[5,10,20,40],10), new Choice(700,600,'Players',undefined,[25,16,4],16)]
 const marbles = []
 const squares = []
 const towers = []
@@ -570,9 +583,6 @@ let t = 0
 let time = 0
 let settings = true
 const infinity = 999999999999999
-for (let i=0; i<16; i++){
-    marbles.push(new Marble(320+i,10,8,1,colors[i],Math.random()*5-2.5,Math.random()*5-2.5))
-}
 for(let i=0; i<6; i++){
     for(let k=0; k<4; k++){
         if(i!=5){
@@ -604,7 +614,7 @@ function doMath(){
     t += 1
     if(t/60 >= coolDown){
         t = 0
-        for (let i=0; i<colors.length; i++){
+        for (let i=0; i<players; i++){
              marbles.push(new Marble(320+i,10,8,1,colors[i],Math.random()*5-2.5,Math.random()*5-2.5))
         }
     }
@@ -636,7 +646,7 @@ function txt(txt,x,y){
     }
     else{
         const width = ctx.measureText(text.slice(0,index)).width
-        ctx.fillText(text.slice(0,index),x-width/2,y+16/3+l*25)
+        ctx.fillText(text.slice(0,index),x-width/2,y+16/3)
     }
 }
 function mainLoop(){
@@ -674,13 +684,13 @@ function mainLoop(){
         for(let i=0; i<bullets.length; i++){
             bullets[i].draw()
         }
-        ctx.font = '24px Arial'
+        ctx.font = '20px Arial'
         ctx.fillStyle = '#000000'
         ctx.fillText(fps,50,50)
-        for(let i=0; i<constantColors.length; i++){
+        for(let i=0; i<col; i++){
             let txt = (squares.filter(s => s.color == constantColors[i]).length/squares.length*100).toFixed(2)
             ctx.fillStyle = constantColors[i]
-            ctx.fillText(txt+'%',1425,50+40*i)
+            ctx.fillText(txt+'%',1425,30+30*i)
         }
     }
     requestAnimationFrame(mainLoop)
@@ -692,8 +702,8 @@ setInterval(() => {
     T = 0
 },1000)
 setInterval(() => {
-    if(marbles.length>100 && multiplyChance<105){
-        multiplyChance += (0.1*180/coolDown+0.5*Math.sqrt(squares.length)/Math.sqrt(25600))/60
+    if(marbles.length>50+players*3 && multiplyChance<105){
+        multiplyChance += (0.1*180/coolDown+0.25*Math.sqrt(squares.length)/Math.sqrt(25600)-multiplyChance/500+0.1*players)/60
     }
 },1000/60)
 window.addEventListener('mousedown',function(e){down(e)})
