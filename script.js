@@ -3,8 +3,9 @@ const ctx = canvas.getContext('2d')
 let green = 0
 let red = 0
 let squareSize = 10
-let accuracy = 20
+let accuracy = 10
 let coolDown = 120
+let multiplyChance = 105
 class Marble{
     constructor(x,y,r,mass,color,vx,vy,gravity=true){
         this.x = x
@@ -14,7 +15,7 @@ class Marble{
         this.r = r
         this.color = color
         this.mass = mass
-        this.gravity=gravity
+        this.gravity = gravity
     }
     math(){
         const list = marbles.filter(m => (m.gravity == true || this.gravity==true) && Math.sqrt(Math.pow(m.x-this.x,2)+Math.pow(m.y-this.y,2))<150)
@@ -86,7 +87,7 @@ class Marble{
                     this.y = 800-this.r
                 }
                 if(this.y>730-this.r && this.x>110+this.r && this.y<740+this.r){
-                    if(this.x<320){
+                    if(this.x<320+multiplyChance && towers.find(t => t.color == this.color).size<100000){
                         towers.find(t => t.color == this.color).size *= 2
                     }
                     else{
@@ -157,7 +158,12 @@ class Bullet{
             this.y = this.size
         }
         for(let i=0; i<squares.length; i++){
-            if(this.x+this.size+Math.abs(this.vx)+3>squares[i].x && this.x-this.size-Math.abs(this.vx)-3<squares[i].x+squareSize && this.y+this.size+Math.abs(this.vy)+3>squares[i].y && this.y-this.size-Math.abs(this.vy)-3<squares[i].y+squareSize){
+            const x_dist = (squares[i].x+squareSize/2)-this.x
+            const y_dist = (squares[i].y+squareSize/2)-this.y
+            const dist = Math.sqrt(Math.pow(x_dist,2)+Math.pow(y_dist,2))
+            const x = this.x+(x_dist/dist)*this.size
+            const y = this.y+(y_dist/dist)*this.size
+            if(x+Math.abs(this.vx)+3>squares[i].x && x-Math.abs(this.vx)-3<squares[i].x+squareSize && y+Math.abs(this.vy)+3>squares[i].y && y-Math.abs(this.vy)-3<squares[i].y+squareSize){
                 if(squares[i].color != this.color && this.mass>0){
                     this.mass -= 1
                     squares[i].color = this.color
@@ -202,9 +208,10 @@ class Bullet{
                     const y_dist = b2.y - b1.y
                     const collisionDist = b1.size+b2.size
                     const dist = Math.sqrt(Math.pow(x_dist,2)+Math.pow(y_dist,2))
+                    const dx = x_dist/dist
+                    const dy = y_dist/dist
+                    //const gravitationalPull = (Math.sqrt(b2.mass)*Math.sqrt(b1.mass))/Math.pow(dist,2)
                     if(dist<collisionDist){
-                        const dx = x_dist/dist
-                        const dy = y_dist/dist
                         const vx = b1.vx - b2.vx
                         const vy = b1.vy - b2.vy
                         const speed = vx*dx+vy*dy
@@ -218,6 +225,8 @@ class Bullet{
                         b2.x-=dx*dif*(b1.mass/(b1.mass+b2.mass))
                         b2.y-=dy*dif*(b1.mass/(b1.mass+b2.mass))
                     }
+                    //b1.vx += ((gravitationalPull*dx)/Math.sqrt(b1.mass))/accuracy
+                    //b1.vy += ((gravitationalPull*dy)/Math.sqrt(b1.mass))/accuracy
                 }
             }
             this.x += this.vx/accuracy
@@ -438,6 +447,14 @@ class Slider{
         }
     }
 }
+class Choice{
+    constructor(x,y,choices,centered=true){
+        this.x = x
+        this.y = y
+        this.choices = choices
+        this.centered = centered
+    }
+}
 class Button{
     constructor(x,y,txt,fn){
         this.x = x
@@ -577,9 +594,9 @@ function mainLoop(){
         ctx.fillRect(90,0,20,800)
         ctx.fillRect(530,0,20,800)
         ctx.fillStyle = '#00ff00'
-        ctx.fillRect(110,730,210,20)
+        ctx.fillRect(110,730,210+multiplyChance,20)
         ctx.fillStyle = '#ff0000'
-        ctx.fillRect(320,730,210,20)
+        ctx.fillRect(320+multiplyChance,730,210-multiplyChance,20)
         for(let i=0; i<marbles.length; i++){
             marbles[i].draw()
         }
@@ -605,6 +622,9 @@ mainLoop()
 setInterval(() => {
     fps = T
     T = 0
+    if(marbles.length>100 && multiplyChance<105){
+        multiplyChance += 0.1
+    }
 },1000)
 window.addEventListener('mousedown',function(e){down(e)})
 window.addEventListener('mousemove',function(e){move(e)})
